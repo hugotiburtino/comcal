@@ -1,7 +1,9 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
-@plugin "daisyui";
 
+@plugin "daisyui" {
+  themes: nord --default, dark --prefersdark;
+}
 
 body {
   font-family: Quicksand, Sans-Serif;

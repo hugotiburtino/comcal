@@ -13,21 +13,15 @@
 	}
 </script>
 
-<section class="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-secondary py-20 text-primary-content">
-	<!-- Decorative elements -->
-	<div class="absolute inset-0 opacity-10">
-		<div class="absolute -left-4 top-10 h-72 w-72 rounded-full bg-white blur-3xl"></div>
-		<div class="absolute -right-4 bottom-10 h-96 w-96 rounded-full bg-white blur-3xl"></div>
-	</div>
-
+<section class="relative overflow-hidden bg-base-300 py-20 text-primary-content">
 	<div class="container relative z-10 mx-auto px-4">
 		<!-- Main headline -->
-		<div class="mx-auto max-w-4xl text-center">
-			<h1 class="mb-6 text-4xl font-bold leading-tight md:text-5xl lg:text-6xl">
-				Connect, Organize, and Collaborate in Decentralized Communities
+		<div class="mx-auto max-w-5xl text-center">
+			<h1 class="mb-6 text-4xl font-bold leading-tight md:text-5xl lg:text-6xl" style="color: oklch(80% 38% 76deg)">
+				Herzlich Willkommen bei efabiNet
 			</h1>
-			<p class="mb-8 text-lg opacity-90 md:text-xl lg:text-2xl">
-				Join topic-based communities, coordinate events, and engage in real-time discussions—all powered by the Nostr protocol
+			<p class="mb-8 text-lg opacity-90 md:text-xl lg:text-2xl font-bold">
+				der Plattform für das bundesweite Netzwerk der Evangelischen Familienbildung
 			</p>
 
 		<!-- Feature badges -->

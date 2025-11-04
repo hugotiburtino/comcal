@@ -147,7 +147,7 @@
 				</ul>
 			</div>
 		{:else}
-			<button onclick={openLoginModal} class="btn btn-primary btn-lg text-xl">Login</button>
+			<button onclick={openLoginModal} class="btn btn-primary btn-lg text-xl text-white">Login</button>
 		{/if}
 	</div>
 	<div class="hidden lg:flex lg:items-center lg:gap-4"></div>

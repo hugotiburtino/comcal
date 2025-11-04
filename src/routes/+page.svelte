@@ -34,11 +34,12 @@
 </script>
 
 <svelte:head>
-	<title>Communikey - Decentralized Communities on Nostr</title>
+	<title>efabiNet - Neu</title>
 	<meta
 		name="description"
-		content="Connect, organize, and collaborate in decentralized communities powered by Nostr protocol"
+		content="der Plattform für das bundesweite Netzwerk der Evangelischen Familienbildung"
 	/>
+	<link rel="icon" href="https://efabi.net/wp-content/uploads/2025/06/cropped-Logo-fuer-Header-32x32.png" sizes="32x32">
 </svelte:head>
 
 {#if !activeUser()}
