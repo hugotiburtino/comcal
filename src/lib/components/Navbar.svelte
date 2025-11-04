@@ -91,15 +91,37 @@
 	}
 </script>
 
-<div class="navbar bg-base-100 shadow-sm ">
-	<div class="flex-1">
-		<a href="/" class="btn text-xl btn-ghost">Communikey</a>
+<style>
+	.logo-container {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 4em;
+		margin-bottom: 1em;
+	}
+
+	.logo-container img {
+		height: 13em;
+		width: auto;
+	}
+</style>
+
+<header>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap" rel="stylesheet">
+</header>
+
+<div class="navbar bg-base-100 shadow-sm justify-between">
+	<div class="logo-container">
+		<img src="https://efabi.net/wp-content/uploads/2025/07/Logo-korrekt.png" alt="efabiNet Logo" title="efabiNet Logo" />
+		<h1 class="text-4xl font-bold">Das Netzwerk für Evangelische Familienbildung</h1>
 	</div>
-	<div class="flex gap-2 items-center">
-		<a href="/calendar" class="btn btn-ghost btn">
+	<div class="flex gap-3 items-start">
+		<!-- <a href="/calendar" class="btn btn-ghost">
 			<CalendarIcon class_="w-5 h-5" />
 			Calendar
-		</a>
+		</a> -->
 		{#if activeAccount}
 			<div class="dropdown dropdown-end">
 				<div tabindex="0" role="button" class="btn avatar btn-circle btn-ghost">
@@ -125,7 +147,8 @@
 				</ul>
 			</div>
 		{:else}
-			<button onclick={openLoginModal} class="btn btn-ghost">Login</button>
+			<button onclick={openLoginModal} class="btn btn-primary btn-lg text-xl">Login</button>
 		{/if}
 	</div>
+	<div class="hidden lg:flex lg:items-center lg:gap-4"></div>
 </div>
