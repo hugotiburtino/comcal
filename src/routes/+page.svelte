@@ -45,6 +45,6 @@
 {#if !activeUser()}
 	<!-- Landing page: For non-logged-in users -->
 	<LandingHero />
-	<FeatureHighlights />
+	<!-- <FeatureHighlights /> -->
 	<CommunityCarousel />
 {/if}
