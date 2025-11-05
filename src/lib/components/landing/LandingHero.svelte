@@ -26,8 +26,6 @@
 				der Plattform für das bundesweite Netzwerk der Evangelischen Familienbildung
 			</p>
 
-		<News />
-
 		<!-- Feature badges -->
 		<div class="mb-10 flex flex-wrap justify-center gap-4">
 			<div class="flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 backdrop-blur-sm">
@@ -67,5 +65,7 @@
 			</a>
 			</div>
 		</div>
+		<News />
+
 	</div>
 </section>
