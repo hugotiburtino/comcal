@@ -1,5 +1,6 @@
 <script>
 	import { modalStore } from '$lib/stores/modal.svelte.js';
+	import News from '$lib/components/landing/News.svelte';
 
 	function handleGetStarted() {
 		modalStore.openModal('signup');
@@ -13,6 +14,7 @@
 	}
 </script>
 
+
 <section class="relative overflow-hidden bg-base-300 py-20 text-primary-content">
 	<div class="container relative z-10 mx-auto px-4">
 		<!-- Main headline -->
@@ -23,6 +25,8 @@
 			<p class="mb-8 text-lg opacity-90 md:text-xl lg:text-2xl font-bold">
 				der Plattform für das bundesweite Netzwerk der Evangelischen Familienbildung
 			</p>
+
+		<News />
 
 		<!-- Feature badges -->
 		<div class="mb-10 flex flex-wrap justify-center gap-4">
