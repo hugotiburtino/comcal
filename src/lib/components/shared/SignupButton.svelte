@@ -5,8 +5,8 @@
 
 	function initializeOidcFlow(currentUrl) {
 		const oidcUserManager = new UserManager({
-			authority: 'https://kc.auth.tchncs.de/realms/nostr-onboarding/account',
-			client_id: 'efabi-neu',
+			authority: 'http://localhost:8080/realms/master',
+			client_id: 'kanban-board',
 			redirect_uri: currentUrl,
 			post_logout_redirect_uri: currentUrl,
 			response_type: 'code',
