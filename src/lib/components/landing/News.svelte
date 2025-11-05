@@ -267,22 +267,22 @@
         </div>
         
         <div class="tabs">
-            <button class="tab-btn" class:active={activeTab === 'articles'} onclick={() => switchTab('articles')}>📄 FOERBICO Artikel</button>
+            <!-- <button class="tab-btn" class:active={activeTab === 'articles'} onclick={() => switchTab('articles')}>📄 FOERBICO Artikel</button> -->
             <button class="tab-btn" class:active={activeTab === 'events'} onclick={() => switchTab('events')}>📅 relilab Events</button>
+			<button class="tab-btn" class:active={activeTab === 'efabi-resources'} onclick={() => switchTab('efabi-resources')}>📝 efabi Ressourcen</button>
         </div>
 
         <div class="tabs">
-            <button class="tab-btn" class:active={activeTab === 'efabi-resources'} onclick={() => switchTab('efabi-resources')}>📝 efabi Ressourcen</button>
+			<button class="tab-btn" class:active={activeTab === 'efabi-network'} onclick={() => switchTab('efabi-network')}>👤 efabi Netzwerkstatt</button>
             <button class="tab-btn" class:active={activeTab === 'efabi-events'} onclick={() => switchTab('efabi-events')}>📆 efabi Veranstaltungen</button>
-            <button class="tab-btn" class:active={activeTab === 'efabi-network'} onclick={() => switchTab('efabi-network')}>👤 efabi Netzwerkstatt</button>
         </div>
     </header>
 
     {#if isLoading}
         <div class="loading">Lade Inhalte...</div>
     {:else}
-        <!-- FOERBICO Articles -->
-        {#if activeTab === 'articles'}
+        <!-- FOERBICO Articles - Not working due to static files-->
+        <!-- {#if activeTab === 'articles'}
             <div class="articles">
                 {#if articles.length === 0}
                     <div class="no-items">Keine Artikel gefunden.</div>
@@ -330,7 +330,7 @@
                     {/each}
                 {/if}
             </div>
-        {/if}
+        {/if} -->
 
         <!-- relilab Events -->
         {#if activeTab === 'events'}
