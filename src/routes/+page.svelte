@@ -25,9 +25,6 @@
 						goto(`/c/${npub}`);
 					}
 				}
-			} else {
-				// No communities - redirect to discover page
-				goto('/discover');
 			}
 		}
 	});
