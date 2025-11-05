@@ -291,7 +291,7 @@
             <div class="carousel-wrapper">
                 <div class="carousel-track" bind:this={carouselTrack}>
                     <!-- relilab Events Cards -->
-                    {#each events.sort((a, b) => {
+                    <!-- {#each events.sort((a, b) => {
                         const aStart = a.tags.find((/** @type {any} */ t) => t[0] === 'start')?.[1] || a.created_at;
                         const bStart = b.tags.find((/** @type {any} */ t) => t[0] === 'start')?.[1] || b.created_at;
                         return parseInt(aStart) - parseInt(bStart);
@@ -327,7 +327,7 @@
                                 {/if}
                             </div>
                         </div>
-                    {/each}
+                    {/each} -->
                     
                     <!-- EFABI Resources Cards -->
                     {#each efabiResources.sort((a, b) => b.created_at - a.created_at).slice(0, 6) as article}
