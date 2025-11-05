@@ -39,9 +39,9 @@
 	<link rel="icon" href="https://efabi.net/wp-content/uploads/2025/06/cropped-Logo-fuer-Header-32x32.png" sizes="32x32">
 </svelte:head>
 
-{#if !activeUser()}
+<!-- {#if !activeUser()} -->
 	<!-- Landing page: For non-logged-in users -->
 	<LandingHero />
 	<!-- <FeatureHighlights /> -->
 	<CommunityCarousel />
-{/if}
+<!-- {/if} -->
