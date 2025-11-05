@@ -5,7 +5,7 @@
 
 	function initializeOidcFlow(currentUrl) {
 		const oidcUserManager = new UserManager({
-			authority: 'https://kc.auth.tchncs.de/realms/nostr-onboarding/account',
+			authority: 'https://kc.auth.tchncs.de/realms/nostr-onboarding',
 			client_id: 'efabi-neu',
 			redirect_uri: currentUrl,
 			post_logout_redirect_uri: currentUrl,
