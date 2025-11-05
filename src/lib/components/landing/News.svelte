@@ -44,7 +44,6 @@
 	});
 
 	// State variables
-	let activeTab = $state('efabi-resources');
 	let isLoading = $state(true);
 	let isConnected = $state(false);
 	let connectedRelays = $state(0);
@@ -61,16 +60,13 @@
 	/** @type {any[]} */
 	let efabiNetwork = [];
 
-	// JSON toggle states
-	/** @type {Record<string, boolean>} */
-	let jsonToggleStates = $state({});
-	/** @type {Record<string, boolean>} */
-	let contentToggleStates = $state({});
+	// Carousel variables
+	/** @type {HTMLElement | null} */
+	let carouselTrack = $state(null);
+	let currentScrollPosition = $state(0);
 
     // Load content on component mount
-    // onMount(() => {
-        loadContent();
-    // });
+    loadContent();
 
 	/**
 	 * @param {number} timestamp
@@ -127,10 +123,32 @@
 	}
 
 	/**
-	 * @param {string} eventId
+	 * Scroll carousel to previous items
 	 */
-	function toggleContent(eventId) {
-		contentToggleStates[eventId] = !contentToggleStates[eventId];
+	function scrollPrev() {
+		if (!carouselTrack) return;
+		const cardWidth = 320; // Card width + gap
+		const scrollAmount = cardWidth * 3; // Scroll by 3 cards
+		currentScrollPosition = Math.max(0, currentScrollPosition - scrollAmount);
+		carouselTrack.scrollTo({
+			left: currentScrollPosition,
+			behavior: 'smooth'
+		});
+	}
+
+	/**
+	 * Scroll carousel to next items
+	 */
+	function scrollNext() {
+		if (!carouselTrack) return;
+		const cardWidth = 320; // Card width + gap
+		const scrollAmount = cardWidth * 3; // Scroll by 3 cards
+		const maxScroll = carouselTrack.scrollWidth - carouselTrack.clientWidth;
+		currentScrollPosition = Math.min(maxScroll, currentScrollPosition + scrollAmount);
+		carouselTrack.scrollTo({
+			left: currentScrollPosition,
+			behavior: 'smooth'
+		});
 	}
 
 	async function loadContent() {
@@ -257,87 +275,22 @@
 
 <!-- EFABI Content Portal: For non-logged-in users -->
 <div class="container">
-    <header>
-        <div class="badge-success">
-            {#if isConnected}
-                ✓ Verbunden ({connectedRelays} Relays)
-            {:else}
-                Verbinde zu Relays...
-            {/if}
-        </div>
-        
-        <div class="tabs">
-            <!-- <button class="tab-btn" class:active={activeTab === 'articles'} onclick={() => switchTab('articles')}>📄 FOERBICO Artikel</button> -->
-            <button class="tab-btn" class:active={activeTab === 'events'} onclick={() => switchTab('events')}>📅 relilab Events</button>
-			<button class="tab-btn" class:active={activeTab === 'efabi-resources'} onclick={() => switchTab('efabi-resources')}>📝 efabi Ressourcen</button>
-        </div>
-
-        <div class="tabs">
-			<button class="tab-btn" class:active={activeTab === 'efabi-network'} onclick={() => switchTab('efabi-network')}>👤 efabi Netzwerkstatt</button>
-            <button class="tab-btn" class:active={activeTab === 'efabi-events'} onclick={() => switchTab('efabi-events')}>📆 efabi Veranstaltungen</button>
-        </div>
-    </header>
-
     {#if isLoading}
         <div class="loading">Lade Inhalte...</div>
     {:else}
-        <!-- FOERBICO Articles - Not working due to static files-->
-        <!-- {#if activeTab === 'articles'}
-            <div class="articles">
-                {#if articles.length === 0}
-                    <div class="no-items">Keine Artikel gefunden.</div>
-                {:else}
-                    {#each articles.sort((a, b) => b.created_at - a.created_at) as article}
-                        {@const title = article.tags.find((/** @type {any} */ t) => t[0] === 'title')?.[1] || 'Ohne Titel'}
-                        {@const summary = article.tags.find((/** @type {any} */ t) => t[0] === 'summary')?.[1] || ''}
-                        {@const image = article.tags.find((/** @type {any} */ t) => t[0] === 'image')?.[1] || ''}
-                        {@const publishedAt = article.tags.find((/** @type {any} */ t) => t[0] === 'published_at')?.[1]}
-                        {@const tags = article.tags.filter((/** @type {any} */ t) => t[0] === 't').map((/** @type {any} */ t) => t[1])}
-                        {@const fullHtmlContent = marked.parse(article.content)}
-                        {@const eventId = article.id.substring(0, 8)}
-                        {@const displayDate = publishedAt ? parseInt(publishedAt) : article.created_at}
-                        
-                        <div class="article">
-                            <h2 class="article-title">{title}</h2>
-                            <div class="article-meta">Veröffentlicht am {formatDate(displayDate)}</div>
-                            
-                            {#if image}
-                                <img src={image} alt={title} class="article-image" />
-                            {/if}
-                            
-                            {#if summary}
-                                <div class="article-summary">{summary}</div>
-                            {/if}
-                            
-                            <div class="article-content">{@html fullHtmlContent}</div>
-                            
-                            {#if tags.length > 0}
-                                <div class="tags">
-                                    {#each tags as tag}
-                                        <span class="tag">{tag}</span>
-                                    {/each}
-                                </div>
-                            {/if}
-                            
-                            <button class="json-toggle" onclick={() => toggleJSON(eventId)}>
-                                {jsonToggleStates[eventId] ? '🔼 JSON ausblenden' : '🔽 JSON anzeigen'}
-                            </button>
-                            
-                            {#if jsonToggleStates[eventId]}
-                                <div class="json-container">{@html formatJSON(article)}</div>
-                            {/if}
-                        </div>
-                    {/each}
-                {/if}
+        <!-- Content Carousel -->
+        <div class="carousel-container">
+            <div class="carousel-header">
+                <h2 class="carousel-title" style="color: oklch(80% 38% 76deg)">Neuigkeiten</h2>
+                <div class="carousel-controls">
+                    <button class="carousel-btn prev" onclick={scrollPrev} aria-label="Previous">‹</button>
+                    <button class="carousel-btn next" onclick={scrollNext} aria-label="Next">›</button>
+                </div>
             </div>
-        {/if} -->
-
-        <!-- relilab Events -->
-        {#if activeTab === 'events'}
-            <div class="events">
-                {#if events.length === 0}
-                    <div class="no-items">Keine Kalender Events gefunden.</div>
-                {:else}
+            
+            <div class="carousel-wrapper">
+                <div class="carousel-track" bind:this={carouselTrack}>
+                    <!-- relilab Events Cards -->
                     {#each events.sort((a, b) => {
                         const aStart = a.tags.find((/** @type {any} */ t) => t[0] === 'start')?.[1] || a.created_at;
                         const bStart = b.tags.find((/** @type {any} */ t) => t[0] === 'start')?.[1] || b.created_at;
@@ -345,131 +298,64 @@
                     }) as event}
                         {@const title = event.tags.find((/** @type {any} */ t) => t[0] === 'title')?.[1] || 'Ohne Titel'}
                         {@const summary = event.tags.find((/** @type {any} */ t) => t[0] === 'summary')?.[1] || ''}
-                        {@const description = event.tags.find((/** @type {any} */ t) => t[0] === 'description')?.[1] || event.content || ''}
                         {@const location = event.tags.find((/** @type {any} */ t) => t[0] === 'location')?.[1] || ''}
                         {@const startTime = event.tags.find((/** @type {any} */ t) => t[0] === 'start')?.[1]}
-                        {@const endTime = event.tags.find((/** @type {any} */ t) => t[0] === 'end')?.[1]}
                         {@const image = event.tags.find((/** @type {any} */ t) => t[0] === 'image')?.[1] || ''}
-                        {@const tags = event.tags.filter((/** @type {any} */ t) => t[0] === 't').map((/** @type {any} */ t) => t[1])}
                         {@const eventId = event.id.substring(0, 8)}
                         
-                        <div class="event">
-                            <h2 class="event-title">{title}</h2>
-                            <div class="event-meta">Erstellt am {formatDate(event.created_at)}</div>
-                            
+                        <div class="card event-card">
+                            <div class="card-badge">📅 relilab Event</div>
                             {#if image}
-                                <img src={image} alt={title} class="article-image" />
+                                <img src={image} alt={title} class="card-image" />
                             {/if}
-                            
-                            <div class="event-details">
-                                {#if startTime}
-                                    <div class="event-detail-row">
-                                        <span class="event-detail-label">Start:</span>
-                                        <span class="event-detail-value">{formatDateTime(parseInt(startTime))}</span>
-                                    </div>
+                            <div class="card-content">
+                                <h3 class="card-title">{title}</h3>
+                                {#if summary}
+                                    <p class="card-summary">{summary}</p>
                                 {/if}
-                                {#if endTime}
-                                    <div class="event-detail-row">
-                                        <span class="event-detail-label">Ende:</span>
-                                        <span class="event-detail-value">{formatDateTime(parseInt(endTime))}</span>
+                                {#if startTime}
+                                    <div class="card-meta">
+                                        <span class="meta-icon">🕐</span>
+                                        <span>{formatDateTime(parseInt(startTime))}</span>
                                     </div>
                                 {/if}
                                 {#if location}
-                                    <div class="event-detail-row">
-                                        <span class="event-detail-label">Ort:</span>
-                                        <span class="event-detail-value">{location}</span>
-                                    </div>
-                                {/if}
-                                {#if summary}
-                                    <div class="event-detail-row">
-                                        <span class="event-detail-label">Zusammenfassung:</span>
-                                        <span class="event-detail-value">{summary}</span>
+                                    <div class="card-meta">
+                                        <span class="meta-icon">📍</span>
+                                        <span>{location}</span>
                                     </div>
                                 {/if}
                             </div>
-                            
-                            {#if description}
-                                <div class="article-content">{@html marked.parse(description)}</div>
-                            {/if}
-                            
-                            {#if tags.length > 0}
-                                <div class="tags">
-                                    {#each tags as tag}
-                                        <span class="tag">{tag}</span>
-                                    {/each}
-                                </div>
-                            {/if}
-                            
-                            <button class="json-toggle" onclick={() => toggleJSON(eventId)}>
-                                {jsonToggleStates[eventId] ? '🔼 JSON ausblenden' : '🔽 JSON anzeigen'}
-                            </button>
-                            
-                            {#if jsonToggleStates[eventId]}
-                                <div class="json-container">{@html formatJSON(event)}</div>
-                            {/if}
                         </div>
                     {/each}
-                {/if}
-            </div>
-        {/if}
-
-        <!-- EFABI Resources -->
-        {#if activeTab === 'efabi-resources'}
-            <div class="articles">
-                {#if efabiResources.length === 0}
-                    <div class="no-items">Keine efabi Ressourcen gefunden.</div>
-                {:else}
-                    {#each efabiResources.sort((a, b) => b.created_at - a.created_at) as article}
+                    
+                    <!-- EFABI Resources Cards -->
+                    {#each efabiResources.sort((a, b) => b.created_at - a.created_at).slice(0, 6) as article}
                         {@const title = article.tags.find((/** @type {any} */ t) => t[0] === 'title')?.[1] || 'Ohne Titel'}
                         {@const summary = article.tags.find((/** @type {any} */ t) => t[0] === 'summary')?.[1] || ''}
                         {@const image = article.tags.find((/** @type {any} */ t) => t[0] === 'image')?.[1] || ''}
                         {@const publishedAt = article.tags.find((/** @type {any} */ t) => t[0] === 'published_at')?.[1]}
-                        {@const tags = article.tags.filter((/** @type {any} */ t) => t[0] === 't').map((/** @type {any} */ t) => t[1])}
-                        {@const fullHtmlContent = marked.parse(article.content)}
-                        {@const eventId = article.id.substring(0, 8)}
                         {@const displayDate = publishedAt ? parseInt(publishedAt) : article.created_at}
                         
-                        <div class="article">
-                            <h2 class="article-title">{title}</h2>
-                            <div class="article-meta">Veröffentlicht am {formatDate(displayDate)}</div>
-                            
+                        <div class="card article-card">
+                            <div class="card-badge">📝 efabi Ressource</div>
                             {#if image}
-                                <img src={image} alt={title} class="article-image" />
+                                <img src={image} alt={title} class="card-image" />
                             {/if}
-                            
-                            {#if summary}
-                                <div class="article-summary">{summary}</div>
-                            {/if}
-                            
-                            <div class="article-content">{@html fullHtmlContent}</div>
-                            
-                            {#if tags.length > 0}
-                                <div class="tags">
-                                    {#each tags as tag}
-                                        <span class="tag">{tag}</span>
-                                    {/each}
+                            <div class="card-content">
+                                <h3 class="card-title">{title}</h3>
+                                {#if summary}
+                                    <p class="card-summary">{summary}</p>
+                                {/if}
+                                <div class="card-meta">
+                                    <span class="meta-icon">📅</span>
+                                    <span>{formatDate(displayDate)}</span>
                                 </div>
-                            {/if}
-                            
-                            <button class="json-toggle" onclick={() => toggleJSON(eventId)}>
-                                {jsonToggleStates[eventId] ? '🔼 JSON ausblenden' : '🔽 JSON anzeigen'}
-                            </button>
-                            
-                            {#if jsonToggleStates[eventId]}
-                                <div class="json-container">{@html formatJSON(article)}</div>
-                            {/if}
+                            </div>
                         </div>
                     {/each}
-                {/if}
-            </div>
-        {/if}
-
-        <!-- EFABI Events -->
-        {#if activeTab === 'efabi-events'}
-            <div class="events">
-                {#if efabiEvents.length === 0}
-                    <div class="no-items">Keine efabi Veranstaltungen gefunden.</div>
-                {:else}
+                    
+                    <!-- EFABI Events Cards -->
                     {#each efabiEvents.sort((a, b) => {
                         const aStart = a.tags.find((/** @type {any} */ t) => t[0] === 'start')?.[1] || a.created_at;
                         const bStart = b.tags.find((/** @type {any} */ t) => t[0] === 'start')?.[1] || b.created_at;
@@ -477,129 +363,73 @@
                     }) as event}
                         {@const title = event.tags.find((/** @type {any} */ t) => t[0] === 'title')?.[1] || 'Ohne Titel'}
                         {@const summary = event.tags.find((/** @type {any} */ t) => t[0] === 'summary')?.[1] || ''}
-                        {@const description = event.tags.find((/** @type {any} */ t) => t[0] === 'description')?.[1] || event.content || ''}
                         {@const location = event.tags.find((/** @type {any} */ t) => t[0] === 'location')?.[1] || ''}
                         {@const startTime = event.tags.find((/** @type {any} */ t) => t[0] === 'start')?.[1]}
-                        {@const endTime = event.tags.find((/** @type {any} */ t) => t[0] === 'end')?.[1]}
                         {@const image = event.tags.find((/** @type {any} */ t) => t[0] === 'image')?.[1] || ''}
-                        {@const tags = event.tags.filter((/** @type {any} */ t) => t[0] === 't').map((/** @type {any} */ t) => t[1])}
-                        {@const eventId = event.id.substring(0, 8)}
                         
-                        <div class="event">
-                            <h2 class="event-title">{title}</h2>
-                            <div class="event-meta">Erstellt am {formatDate(event.created_at)}</div>
-                            
+                        <div class="card event-card">
+                            <div class="card-badge">📆 efabi Event</div>
                             {#if image}
-                                <img src={image} alt={title} class="article-image" />
+                                <img src={image} alt={title} class="card-image" />
                             {/if}
-                            
-                            <div class="event-details">
-                                {#if startTime}
-                                    <div class="event-detail-row">
-                                        <span class="event-detail-label">Start:</span>
-                                        <span class="event-detail-value">{formatDateTime(parseInt(startTime))}</span>
-                                    </div>
+                            <div class="card-content">
+                                <h3 class="card-title">{title}</h3>
+                                {#if summary}
+                                    <p class="card-summary">{summary}</p>
                                 {/if}
-                                {#if endTime}
-                                    <div class="event-detail-row">
-                                        <span class="event-detail-label">Ende:</span>
-                                        <span class="event-detail-value">{formatDateTime(parseInt(endTime))}</span>
+                                {#if startTime}
+                                    <div class="card-meta">
+                                        <span class="meta-icon">🕐</span>
+                                        <span>{formatDateTime(parseInt(startTime))}</span>
                                     </div>
                                 {/if}
                                 {#if location}
-                                    <div class="event-detail-row">
-                                        <span class="event-detail-label">Ort:</span>
-                                        <span class="event-detail-value">{location}</span>
-                                    </div>
-                                {/if}
-                                {#if summary}
-                                    <div class="event-detail-row">
-                                        <span class="event-detail-label">Zusammenfassung:</span>
-                                        <span class="event-detail-value">{summary}</span>
+                                    <div class="card-meta">
+                                        <span class="meta-icon">📍</span>
+                                        <span>{location}</span>
                                     </div>
                                 {/if}
                             </div>
-                            
-                            {#if description}
-                                <div class="article-content">{@html marked.parse(description)}</div>
-                            {/if}
-                            
-                            {#if tags.length > 0}
-                                <div class="tags">
-                                    {#each tags as tag}
-                                        <span class="tag">{tag}</span>
-                                    {/each}
-                                </div>
-                            {/if}
-                            
-                            <button class="json-toggle" onclick={() => toggleJSON(eventId)}>
-                                {jsonToggleStates[eventId] ? '🔼 JSON ausblenden' : '🔽 JSON anzeigen'}
-                            </button>
-                            
-                            {#if jsonToggleStates[eventId]}
-                                <div class="json-container">{@html formatJSON(event)}</div>
-                            {/if}
                         </div>
                     {/each}
-                {/if}
-            </div>
-        {/if}
-
-        <!-- EFABI Network -->
-        {#if activeTab === 'efabi-network'}
-            <div class="network">
-                {#if efabiNetwork.length === 0}
-                    <div class="no-items">Keine Netzwerkstatt-Profile gefunden.</div>
-                {:else}
-                    {#each efabiNetwork as profile}
+                    
+                    <!-- EFABI Network Cards -->
+                    {#each efabiNetwork.slice(0, 4) as profile}
                         {@const profileData = JSON.parse(profile.content || '{}')}
-                        {@const eventId = profile.id.substring(0, 8)}
                         
-                        <div class="network-profile">
-                            <div class="profile-header">
-                                {#if profileData.picture}
-                                    <img src={profileData.picture} alt={profileData.name || 'Profil'} class="profile-avatar" />
-                                {:else}
-                                    <div class="profile-avatar-placeholder">👤</div>
-                                {/if}
-                                
-                                <div class="profile-info">
-                                    {#if profileData.name}
-                                        <h3 class="profile-name">{profileData.name}</h3>
+                        <div class="card profile-card">
+                            <div class="card-badge">👤 efabi Netzwerk</div>
+                            <div class="card-content">
+                                <div class="profile-header-small">
+                                    {#if profileData.picture}
+                                        <img src={profileData.picture} alt={profileData.name || 'Profil'} class="profile-avatar-small" />
+                                    {:else}
+                                        <div class="profile-avatar-placeholder-small">👤</div>
                                     {/if}
-                                    
-                                    {#if profileData.nip05}
-                                        <div class="profile-nip05">{profileData.nip05}</div>
-                                    {/if}
-                                    
-                                    {#if profileData.about}
-                                        <div class="profile-about">
-                                            {@html marked.parse(profileData.about)}
-                                        </div>
-                                    {/if}
-                                    
-                                    {#if profileData.website}
-                                        <div class="profile-website">
-                                            <a href={profileData.website} target="_blank" rel="noopener noreferrer">
-                                                {profileData.website}
-                                            </a>
-                                        </div>
-                                    {/if}
+                                    <div class="profile-info-small">
+                                        {#if profileData.name}
+                                            <h3 class="card-title profile-name-small">{profileData.name}</h3>
+                                        {/if}
+                                        {#if profileData.nip05}
+                                            <div class="profile-nip05-small">{profileData.nip05}</div>
+                                        {/if}
+                                    </div>
                                 </div>
+                                {#if profileData.about}
+                                    <p class="card-summary">{profileData.about.slice(0, 120)}...</p>
+                                {/if}
+                                {#if profileData.website}
+                                    <div class="card-meta">
+                                        <span class="meta-icon">🌐</span>
+                                        <span class="profile-website-small">{profileData.website.replace(/^https?:\/\//, '')}</span>
+                                    </div>
+                                {/if}
                             </div>
-                            
-                            <button class="json-toggle" onclick={() => toggleJSON(eventId)}>
-                                {jsonToggleStates[eventId] ? '🔼 JSON ausblenden' : '🔽 JSON anzeigen'}
-                            </button>
-                            
-                            {#if jsonToggleStates[eventId]}
-                                <div class="json-container">{@html formatJSON(profile)}</div>
-                            {/if}
                         </div>
                     {/each}
-                {/if}
+                </div>
             </div>
-        {/if}
+        </div>
     {/if}
 </div>
 
@@ -617,102 +447,235 @@
 	}
 
 	.container {
-		max-width: 1000px;
+		max-width: 1200px;
 		margin: 0 auto;
 		padding: 20px;
 	}
 
-	header {
+	/* Carousel Styles */
+	.carousel-container {
 		background: white;
-		padding: 30px 40px;
-		border-radius: 12px;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+		border-radius: 16px;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+		padding: 30px;
 		margin-bottom: 30px;
-		text-align: center;
-		border-bottom: 4px solid var(--efabi-h1);
 	}
 
-	.logo-container {
+	.carousel-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 25px;
+		padding-bottom: 15px;
+		border-bottom: 2px solid var(--efabi-border);
+	}
+
+	.carousel-title {
+		color: var(--efabi-h2);
+		font-size: 2em;
+		font-weight: 700;
+		margin: 0;
+	}
+
+	.carousel-controls {
+		display: flex;
+		gap: 10px;
+	}
+
+	.carousel-btn {
+		width: 50px;
+		height: 50px;
+		border-radius: 50%;
+		border: 2px solid var(--efabi-link);
+		background: white;
+		color: var(--efabi-link);
+		cursor: pointer;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		gap: 15px;
-		margin-bottom: 15px;
-	}
-
-	.logo-container img {
-		height: 60px;
-		width: auto;
-	}
-
-	h1 {
-		color: var(--efabi-h2);
-		font-size: 2.2em;
-		margin-bottom: 8px;
-		font-weight: 700;
-		display: inline-block;
-	}
-
-	.subtitle {
-		color: var(--efabi-h2);
-		font-size: 1.1em;
-		margin-bottom: 25px;
-		opacity: 0.9;
-	}
-
-	.tabs {
-		display: flex;
-		gap: 12px;
-		margin-top: 25px;
-		justify-content: center;
-		flex-wrap: wrap;
-	}
-
-	.tab-btn {
-		padding: 12px 28px;
-		background: var(--efabi-border);
-		border: 2px solid transparent;
-		border-radius: 8px;
-		cursor: pointer;
-		font-size: 1em;
+		font-size: 24px;
+		font-weight: bold;
 		transition: all 0.3s ease;
-		color: var(--efabi-text);
-		font-weight: 500;
+		box-shadow: 0 2px 8px rgba(63, 64, 247, 0.1);
 	}
 
-	.tab-btn.active {
+	.carousel-btn:hover {
 		background: var(--efabi-link);
 		color: white;
-		border-color: var(--efabi-link-hover);
-		box-shadow: 0 4px 12px rgba(63, 64, 247, 0.2);
+		transform: scale(1.1);
+		box-shadow: 0 4px 12px rgba(63, 64, 247, 0.3);
 	}
 
-	.tab-btn:hover {
-		background: #e0e0e0;
+	.carousel-wrapper {
+		overflow: hidden;
+		border-radius: 12px;
 	}
 
-	.tab-btn.active:hover {
+	.carousel-track {
+		display: flex;
+		gap: 20px;
+		overflow-x: auto;
+		scroll-behavior: smooth;
+		padding-bottom: 10px;
+		scrollbar-width: thin;
+		scrollbar-color: var(--efabi-border) transparent;
+	}
+
+	.carousel-track::-webkit-scrollbar {
+		height: 8px;
+	}
+
+	.carousel-track::-webkit-scrollbar-track {
+		background: var(--efabi-border);
+		border-radius: 4px;
+	}
+
+	.carousel-track::-webkit-scrollbar-thumb {
+		background: var(--efabi-link);
+		border-radius: 4px;
+	}
+
+	.carousel-track::-webkit-scrollbar-thumb:hover {
 		background: var(--efabi-link-hover);
 	}
 
-	.status {
-		display: inline-block;
-		padding: 10px 20px;
+	/* Card Styles */
+	.card {
+		flex: 0 0 300px;
+		background: white;
+		border-radius: 12px;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+		border: 1px solid var(--efabi-border);
+		transition: all 0.3s ease;
+		overflow: hidden;
+		position: relative;
+	}
+
+	.card:hover {
+		transform: translateY(-5px);
+		box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+		border-color: var(--efabi-link);
+	}
+
+	.card-badge {
+		position: absolute;
+		top: 12px;
+		left: 12px;
+		background: var(--efabi-link);
+		color: white;
+		padding: 6px 12px;
 		border-radius: 20px;
-		font-size: 0.95em;
-		margin-top: 15px;
-		font-weight: 500;
+		font-size: 0.8em;
+		font-weight: 600;
+		z-index: 2;
+		box-shadow: 0 2px 8px rgba(63, 64, 247, 0.3);
 	}
 
-	.status.connecting {
-		background: #fff3cd;
+	.card-image {
+		width: 100%;
+		height: 180px;
+		object-fit: cover;
+		border-bottom: 1px solid var(--efabi-border);
+	}
+
+	.card-content {
+		padding: 20px;
+	}
+
+	.card-title {
 		color: var(--efabi-h2);
+		font-size: 1.3em;
+		font-weight: 700;
+		margin-bottom: 12px;
+		line-height: 1.3;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
 	}
 
-	.status.connected {
-		background: #d4edda;
-		color: #155724;
+	.card-summary {
+		color: var(--efabi-text);
+		font-size: 0.95em;
+		line-height: 1.5;
+		margin-bottom: 15px;
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
 	}
+
+	.card-meta {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		color: var(--efabi-text);
+		font-size: 0.85em;
+		margin-bottom: 8px;
+		opacity: 0.8;
+	}
+
+	.card-meta:last-child {
+		margin-bottom: 0;
+	}
+
+	.meta-icon {
+		font-size: 1em;
+		flex-shrink: 0;
+	}
+
+	/* Profile Card Specific Styles */
+	.profile-header-small {
+		display: flex;
+		gap: 15px;
+		align-items: center;
+		margin-bottom: 15px;
+	}
+
+	.profile-avatar-small {
+		width: 60px;
+		height: 60px;
+		border-radius: 50%;
+		object-fit: cover;
+		border: 3px solid var(--efabi-link);
+		flex-shrink: 0;
+	}
+
+	.profile-avatar-placeholder-small {
+		width: 60px;
+		height: 60px;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: var(--efabi-border);
+		font-size: 1.5em;
+		flex-shrink: 0;
+	}
+
+	.profile-info-small {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.profile-name-small {
+		margin-bottom: 5px;
+		font-size: 1.1em;
+	}
+
+	.profile-nip05-small {
+		color: var(--efabi-link);
+		font-size: 0.8em;
+		font-weight: 500;
+		word-break: break-all;
+	}
+
+	.profile-website-small {
+		word-break: break-all;
+		color: var(--efabi-link);
+	}
+
+
 
 	.loading {
 		text-align: center;
@@ -1081,99 +1044,98 @@
 			padding: 12px;
 		}
 
-		h1 {
-			font-size: 2.2em;
+		.carousel-container {
+			padding: 20px;
 		}
 
-		.subtitle {
-			font-size: 1em;
+		.carousel-header {
+			flex-direction: column;
+			gap: 15px;
+			align-items: flex-start;
 		}
 
-		header {
-			padding: 25px;
+		.carousel-title {
+			font-size: 1.6em;
 		}
 
-		.article, .event {
-			padding: 22px;
+		.carousel-controls {
+			align-self: center;
 		}
 
-		.article-title, .event-title {
-			font-size: 1.5em;
+		.carousel-btn {
+			width: 45px;
+			height: 45px;
+			font-size: 20px;
 		}
 
-		.article-content {
-			font-size: 1em;
+		.card {
+			flex: 0 0 280px;
 		}
 
-		.json-container {
-			font-size: 0.75em;
+		.card-content {
 			padding: 15px;
-			max-height: 300px;
 		}
 
-		.json-toggle {
-			width: 100%;
-			padding: 12px;
+		.card-title {
+			font-size: 1.2em;
 		}
 
-		.tags {
-			gap: 6px;
-		}
-
-		.tag {
-			font-size: 0.8em;
-		}
-
-		.tabs {
-			gap: 8px;
-		}
-
-		.tab-btn {
-			padding: 10px 16px;
-			font-size: 0.9em;
+		.card-image {
+			height: 160px;
 		}
 	}
 
 	@media (max-width: 480px) {
-		h1 {
-			font-size: 1.8em;
+		.container {
+			padding: 8px;
 		}
 
-		.subtitle {
-			font-size: 0.95em;
+		.carousel-container {
+			padding: 15px;
 		}
 
-		header {
-			padding: 18px;
+		.carousel-title {
+			font-size: 1.4em;
 		}
 
-		.article, .event {
-			padding: 16px;
+		.carousel-btn {
+			width: 40px;
+			height: 40px;
+			font-size: 18px;
 		}
 
-		.article-title, .event-title {
-			font-size: 1.3em;
+		.card {
+			flex: 0 0 250px;
 		}
 
-		.article-meta, .event-meta {
+		.card-content {
+			padding: 12px;
+		}
+
+		.card-title {
+			font-size: 1.1em;
+		}
+
+		.card-summary {
 			font-size: 0.9em;
 		}
 
-		.article-content {
-			font-size: 0.95em;
+		.card-image {
+			height: 140px;
 		}
 
-		.json-container {
-			font-size: 0.7em;
-			padding: 10px;
+		.profile-header-small {
+			gap: 10px;
 		}
 
-		.tabs {
-			flex-direction: column;
+		.profile-avatar-small,
+		.profile-avatar-placeholder-small {
+			width: 50px;
+			height: 50px;
 		}
 
-		.tab-btn {
-			width: 100%;
+		.profile-avatar-placeholder-small {
+			font-size: 1.2em;
 		}
 	}
 </style>
