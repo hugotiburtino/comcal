@@ -61,14 +61,12 @@
 		const currentUrl = window.location.href;
 		
 		const urlParams = new URLSearchParams(currentUrl);
-		console.log({urlParams});
 		const hasOidcParams = urlParams.has('code') && urlParams.has('session_state');
 		// Only process OIDC callback if URL contains 'code' and 'state' parameters
-		console.log({hasOidcParams});
 		if (hasOidcParams) {
 			const oidcUserManager = new UserManager({
-				authority: 'http://localhost:8080/realms/master',
-				client_id: 'kanban-board',
+				authority: 'https://kc.auth.tchncs.de/realms/nostr-onboarding/account',
+				client_id: 'efabi-neu',
 				redirect_uri: currentUrl,
 				post_logout_redirect_uri: currentUrl,
 				response_type: 'code',
