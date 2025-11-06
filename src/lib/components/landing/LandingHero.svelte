@@ -28,15 +28,19 @@
 
 		<!-- Feature badges -->
 		<div class="mb-10 flex flex-wrap justify-center gap-4">
-			<div class="flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 backdrop-blur-sm">
-				<span class="text-2xl">🏘️</span>
-				<span class="font-medium">Communities</span>
-			</div>
+			<a	
+				href="/discover"
+			>
+				<div class="flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 backdrop-blur-sm">
+					<span class="text-2xl">🏘️</span>
+					<span class="font-medium">Communities</span>
+				</div>
+			</a>
 			<div class="flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 backdrop-blur-sm">
 				<span class="text-2xl">💬</span>
 				<span class="font-medium">Chat</span>
 			</div>
-			<a 
+			<a
 				href="/calendar"
 				class="flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 backdrop-blur-sm transition-opacity hover:opacity-80 cursor-pointer"
 			>
@@ -52,14 +56,8 @@
 			<!-- Call to action buttons -->
 			<div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
 				<a
-					href="/calendar"
-					class="btn btn-lg bg-white text-primary hover:bg-white/90 border-none shadow-lg"
-				>
-					Browse Calendar
-			</a>
-				<a
 					href="/discover"
-					class="btn btn-lg btn-outline border-2 border-white text-white hover:bg-white hover:text-primary"
+					class="btn btn-lg bg-white text-primary hover:bg-white/90 border-none shadow-lg"
 				>
 					Explore Communities
 			</a>
