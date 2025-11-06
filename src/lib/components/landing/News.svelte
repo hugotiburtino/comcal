@@ -5,16 +5,6 @@
 
 	// Configuration für verschiedene Content-Publisher
 	const publishers = {
-		articles: {
-			name: 'FOERBICO Artikel',
-			npub: 'npub1tgftg8kptdrxxg0g3sm3hckuglv3j0uu3way4vylc5qyt0f44m0s3gun6e',
-			kind: 30023
-		},
-		events: {
-			name: 'relilab Events',
-			npub: 'npub12j35qpeve33929kg64etvw9g9rzms4c8g5gnqta58yhjdc6wryfse3phmu',
-			kind: 31923
-		},
 		efabiResources: {
 			name: 'efabi Ressourcen',
 			npub: 'npub14esruzfvraksa9gyqkyp0uzgp5ytnlqu96rpj0ergk05s9hy9wrspsljvc',
@@ -50,15 +40,11 @@
 
 	// Content arrays
 	/** @type {any[]} */
-	let articles = [];
+	let efabiResources = $state([]);
 	/** @type {any[]} */
-	let events = [];
+	let efabiEvents = $state([]);
 	/** @type {any[]} */
-	let efabiResources = [];
-	/** @type {any[]} */
-	let efabiEvents = [];
-	/** @type {any[]} */
-	let efabiNetwork = [];
+	let efabiNetwork = $state([]);
 
 	// Carousel variables
 	/** @type {HTMLElement | null} */
@@ -92,34 +78,6 @@
 			hour: '2-digit',
 			minute: '2-digit'
 		});
-	}
-
-	/**
-	 * @param {any} obj
-	 */
-	function formatJSON(obj) {
-		let json = JSON.stringify(obj, null, 2);
-		
-		json = json.replace(/"([^"]+)":/g, '<span class="json-key">"$1":</span>');
-		json = json.replace(/: "([^"]+)"/g, ': <span class="json-string">"$1"</span>');
-		json = json.replace(/: (\d+)/g, ': <span class="json-number">$1</span>');
-		json = json.replace(/: (true|false)/g, ': <span class="json-boolean">$1</span>');
-		
-		return json;
-	}
-
-	/**
-	 * @param {string} tab
-	 */
-	function switchTab(tab) {
-		activeTab = tab;
-	}
-
-	/**
-	 * @param {string} eventId
-	 */
-	function toggleJSON(eventId) {
-		jsonToggleStates[eventId] = !jsonToggleStates[eventId];
 	}
 
 	/**
@@ -160,29 +118,9 @@
 			console.log('🔗 Verbinde zu Relays:', relays);
 
 			// Decode publisher pubkeys
-			const { data: articleHex } = nip19.decode(publishers.articles.npub);
-			const { data: eventHex } = nip19.decode(publishers.events.npub);
 			const { data: efabiHex } = nip19.decode(publishers.efabiResources.npub);
 
-			console.log('📊 FOERBICO Hex:', articleHex);
-			console.log('📊 relilab Hex:', eventHex);
 			console.log('📊 EFABI Hex:', efabiHex);
-
-			// Load FOERBICO Artikel (NIP-23: Long-form Content)
-			const articleFilter = {
-				kinds: [publishers.articles.kind],
-				authors: [articleHex],
-				limit: 50
-			};
-			console.log('🔍 FOERBICO Artikel-Filter:', articleFilter);
-			
-			// Load relilab Events (NIP-52: Calendar Events)
-			const eventFilter = {
-				kinds: [publishers.events.kind],
-				authors: [eventHex],
-				limit: 50
-			};
-			console.log('🔍 relilab Event-Filter:', eventFilter);
 
 			// Load EFABI Ressourcen (NIP-23: Long-form Content)
 			const efabiResourceFilter = {
@@ -238,27 +176,23 @@
 
 			// Query all filters in parallel
 			const [
-				articlesResult,
-				eventsResult,
 				efabiResourcesResult,
 				efabiEventsResult,
 				efabiNetworkResult
 			] = await Promise.all([
-				loadData(articleFilter),
-				loadData(eventFilter),
 				loadData(efabiResourceFilter),
 				loadData(efabiEventFilter),
 				loadData(efabiNetworkFilter)
 			]);
 
-			articles = articlesResult || [];
-			events = eventsResult || [];
-			efabiResources = efabiResourcesResult || [];
-			efabiEvents = efabiEventsResult || [];
+			efabiResources = efabiResourcesResult.sort((a, b) => b.created_at - a.created_at) || [];
+			efabiEvents = efabiEventsResult.sort((a, b) => {
+                        const aStart = a.tags.find((/** @type {any} */ t) => t[0] === 'start')?.[1] || a.created_at;
+                        const bStart = b.tags.find((/** @type {any} */ t) => t[0] === 'start')?.[1] || b.created_at;
+                        return parseInt(aStart) - parseInt(bStart);
+                    }) || [];
 			efabiNetwork = efabiNetworkResult || [];
 
-			console.log('✅ FOERBICO Artikel geladen:', articles.length);
-			console.log('✅ relilab Events geladen:', events.length);
 			console.log('✅ EFABI Ressourcen geladen:', efabiResources.length);
 			console.log('✅ EFABI Events geladen:', efabiEvents.length);
 			console.log('✅ EFABI Netzwerk-Profile geladen:', efabiNetwork.length);
@@ -290,47 +224,8 @@
             
             <div class="carousel-wrapper">
                 <div class="carousel-track" bind:this={carouselTrack}>
-                    <!-- relilab Events Cards -->
-                    <!-- {#each events.sort((a, b) => {
-                        const aStart = a.tags.find((/** @type {any} */ t) => t[0] === 'start')?.[1] || a.created_at;
-                        const bStart = b.tags.find((/** @type {any} */ t) => t[0] === 'start')?.[1] || b.created_at;
-                        return parseInt(aStart) - parseInt(bStart);
-                    }) as event}
-                        {@const title = event.tags.find((/** @type {any} */ t) => t[0] === 'title')?.[1] || 'Ohne Titel'}
-                        {@const summary = event.tags.find((/** @type {any} */ t) => t[0] === 'summary')?.[1] || ''}
-                        {@const location = event.tags.find((/** @type {any} */ t) => t[0] === 'location')?.[1] || ''}
-                        {@const startTime = event.tags.find((/** @type {any} */ t) => t[0] === 'start')?.[1]}
-                        {@const image = event.tags.find((/** @type {any} */ t) => t[0] === 'image')?.[1] || ''}
-                        {@const eventId = event.id.substring(0, 8)}
-                        
-                        <div class="card event-card">
-                            <div class="card-badge">📅 relilab Event</div>
-                            {#if image}
-                                <img src={image} alt={title} class="card-image" />
-                            {/if}
-                            <div class="card-content">
-                                <h3 class="card-title">{title}</h3>
-                                {#if summary}
-                                    <p class="card-summary">{summary}</p>
-                                {/if}
-                                {#if startTime}
-                                    <div class="card-meta">
-                                        <span class="meta-icon">🕐</span>
-                                        <span>{formatDateTime(parseInt(startTime))}</span>
-                                    </div>
-                                {/if}
-                                {#if location}
-                                    <div class="card-meta">
-                                        <span class="meta-icon">📍</span>
-                                        <span>{location}</span>
-                                    </div>
-                                {/if}
-                            </div>
-                        </div>
-                    {/each} -->
-                    
                     <!-- EFABI Resources Cards -->
-                    {#each efabiResources.sort((a, b) => b.created_at - a.created_at).slice(0, 6) as article}
+                    {#each efabiResources as article}
                         {@const title = article.tags.find((/** @type {any} */ t) => t[0] === 'title')?.[1] || 'Ohne Titel'}
                         {@const summary = article.tags.find((/** @type {any} */ t) => t[0] === 'summary')?.[1] || ''}
                         {@const image = article.tags.find((/** @type {any} */ t) => t[0] === 'image')?.[1] || ''}
@@ -338,7 +233,7 @@
                         {@const displayDate = publishedAt ? parseInt(publishedAt) : article.created_at}
                         
                         <div class="card article-card">
-                            <div class="card-badge">📝 efabi Ressource</div>
+                            <div class="card-badge">📝 efabi Artikel</div>
                             {#if image}
                                 <img src={image} alt={title} class="card-image" />
                             {/if}
@@ -356,11 +251,7 @@
                     {/each}
                     
                     <!-- EFABI Events Cards -->
-                    {#each efabiEvents.sort((a, b) => {
-                        const aStart = a.tags.find((/** @type {any} */ t) => t[0] === 'start')?.[1] || a.created_at;
-                        const bStart = b.tags.find((/** @type {any} */ t) => t[0] === 'start')?.[1] || b.created_at;
-                        return parseInt(aStart) - parseInt(bStart);
-                    }) as event}
+                    {#each efabiEvents as event}
                         {@const title = event.tags.find((/** @type {any} */ t) => t[0] === 'title')?.[1] || 'Ohne Titel'}
                         {@const summary = event.tags.find((/** @type {any} */ t) => t[0] === 'summary')?.[1] || ''}
                         {@const location = event.tags.find((/** @type {any} */ t) => t[0] === 'location')?.[1] || ''}
@@ -394,7 +285,7 @@
                     {/each}
                     
                     <!-- EFABI Network Cards -->
-                    {#each efabiNetwork.slice(0, 4) as profile}
+                    {#each efabiNetwork as profile}
                         {@const profileData = JSON.parse(profile.content || '{}')}
                         
                         <div class="card profile-card">
@@ -685,358 +576,6 @@
 		background: white;
 		border-radius: 12px;
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-	}
-
-	.articles, .events {
-		display: grid;
-		gap: 28px;
-	}
-
-	.article, .event {
-		background: white;
-		padding: 32px;
-		border-radius: 12px;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-		transition: transform 0.3s ease, box-shadow 0.3s ease;
-		border-left: 4px solid var(--efabi-border);
-	}
-
-	.article:hover, .event:hover {
-		transform: translateY(-3px);
-		box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-		border-left-color: var(--efabi-link);
-	}
-
-	.article-title, .event-title {
-		font-size: 1.9em;
-		color: var(--efabi-h2);
-		margin-bottom: 12px;
-		line-height: 1.3;
-		font-weight: 700;
-	}
-
-	.article-meta, .event-meta {
-		color: var(--efabi-text);
-		font-size: 0.95em;
-		margin-bottom: 20px;
-		padding-bottom: 16px;
-		border-bottom: 2px solid var(--efabi-border);
-		opacity: 0.85;
-	}
-
-	.event-details {
-		background: #f8f9fa;
-		padding: 18px;
-		border-radius: 8px;
-		margin: 18px 0;
-		border-left: 4px solid var(--efabi-link);
-	}
-
-	.event-detail-row {
-		margin-bottom: 12px;
-		display: flex;
-		align-items: start;
-		gap: 12px;
-	}
-
-	.event-detail-row:last-child {
-		margin-bottom: 0;
-	}
-
-	.event-detail-label {
-		font-weight: 600;
-		color: var(--efabi-h2);
-		min-width: 100px;
-	}
-
-	.event-detail-value {
-		color: var(--efabi-text);
-		word-break: break-word;
-		flex: 1;
-	}
-
-	.article-summary {
-		color: var(--efabi-text);
-		font-size: 1.08em;
-		line-height: 1.7;
-		margin-bottom: 18px;
-		font-style: italic;
-		background: #f8f9fa;
-		padding: 16px;
-		border-left: 3px solid var(--efabi-h1);
-		border-radius: 4px;
-	}
-
-	.article-content {
-		color: var(--efabi-text);
-		line-height: 1.9;
-		font-size: 1.05em;
-	}
-
-	.article-content :global(h1),
-	.article-content :global(h2),
-	.article-content :global(h3),
-	.article-content :global(h4) {
-		margin-top: 24px;
-		margin-bottom: 12px;
-		color: var(--efabi-h2);
-		font-weight: 700;
-	}
-
-	.article-content :global(h1) {
-		font-size: 1.9em;
-		border-bottom: 2px solid var(--efabi-border);
-		padding-bottom: 12px;
-	}
-
-	.article-content :global(h2) {
-		font-size: 1.6em;
-	}
-
-	.article-content :global(h3) {
-		font-size: 1.4em;
-	}
-
-	.article-content :global(p) {
-		margin-bottom: 16px;
-	}
-
-	.article-content :global(a) {
-		color: var(--efabi-link);
-		text-decoration: none;
-		border-bottom: 1px solid var(--efabi-link);
-		transition: color 0.2s ease;
-	}
-
-	.article-content :global(a:hover) {
-		color: var(--efabi-link-hover);
-		border-bottom-color: var(--efabi-link-hover);
-	}
-
-	.article-content :global(img) {
-		max-width: 100%;
-		height: auto;
-		border-radius: 8px;
-		margin: 20px 0;
-		display: block;
-	}
-
-	.article-content :global(ul),
-	.article-content :global(ol) {
-		margin-left: 20px;
-		margin-bottom: 15px;
-	}
-
-	.article-content :global(li) {
-		margin-bottom: 8px;
-	}
-
-	.article-content :global(blockquote) {
-		border-left: 4px solid #667eea;
-		padding-left: 20px;
-		margin: 20px 0;
-		color: #636e72;
-		font-style: italic;
-	}
-
-	.article-content :global(code) {
-		background: #f0f0f0;
-		padding: 2px 6px;
-		border-radius: 4px;
-		font-family: 'Courier New', monospace;
-		font-size: 0.9em;
-	}
-
-	.article-content :global(pre) {
-		background: #2d3436;
-		color: #55efc4;
-		padding: 15px;
-		border-radius: 8px;
-		overflow-x: auto;
-		margin: 15px 0;
-	}
-
-	.article-content :global(pre code) {
-		background: none;
-		padding: 0;
-		color: inherit;
-	}
-
-	.tags {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 10px;
-		margin-top: 22px;
-	}
-
-	.tag {
-		background: #e8f1ff;
-		color: var(--efabi-link);
-		padding: 6px 14px;
-		border-radius: 16px;
-		font-size: 0.85em;
-		font-weight: 500;
-		border: 1px solid var(--efabi-border);
-	}
-
-	.no-items {
-		background: white;
-		padding: 50px;
-		border-radius: 12px;
-		text-align: center;
-		color: var(--efabi-text);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-	}
-
-	.json-toggle {
-		margin-top: 22px;
-		padding: 11px 22px;
-		background: var(--efabi-border);
-		border: 1px solid #d0d8e0;
-		border-radius: 8px;
-		cursor: pointer;
-		font-size: 0.9em;
-		color: var(--efabi-text);
-		transition: all 0.2s ease;
-		font-weight: 500;
-	}
-
-	.json-toggle:hover {
-		background: #d0d8e0;
-	}
-
-	.article-image {
-		width: 100%;
-		max-width: 100%;
-		height: auto;
-		border-radius: 12px;
-		margin: 20px 0;
-		object-fit: cover;
-	}
-
-	.json-container {
-		margin-top: 15px;
-		background: #2d3436;
-		color: #55efc4;
-		padding: 20px;
-		border-radius: 8px;
-		overflow-x: auto;
-		font-family: 'Courier New', monospace;
-		font-size: 0.85em;
-		line-height: 1.5;
-		max-height: 500px;
-		overflow-y: auto;
-		word-wrap: break-word;
-		overflow-wrap: break-word;
-		white-space: pre-wrap;
-		max-width: 100%;
-	}
-
-	.json-container :global(.json-key) {
-		color: #74b9ff;
-		word-break: break-all;
-	}
-
-	.json-container :global(.json-string) {
-		color: #55efc4;
-		word-break: break-all;
-	}
-
-	.json-container :global(.json-number) {
-		color: #fdcb6e;
-	}
-
-	.json-container :global(.json-boolean) {
-		color: #ff7675;
-	}
-
-	.network {
-		display: flex;
-		flex-direction: column;
-		gap: 20px;
-	}
-
-	.network-profile {
-		background: white;
-		padding: 25px;
-		border-radius: 12px;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-		border-left: 4px solid var(--efabi-border);
-		transition: border-left-color 0.3s ease;
-	}
-
-	.network-profile:hover {
-		border-left-color: var(--efabi-link);
-	}
-
-	.profile-header {
-		display: flex;
-		gap: 20px;
-		align-items: flex-start;
-		margin-bottom: 20px;
-	}
-
-	.profile-avatar {
-		width: 80px;
-		height: 80px;
-		border-radius: 50%;
-		object-fit: cover;
-		border: 3px solid var(--efabi-link);
-	}
-
-	.profile-avatar-placeholder {
-		width: 80px;
-		height: 80px;
-		border-radius: 50%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		background: var(--efabi-border);
-		font-size: 2em;
-		flex-shrink: 0;
-	}
-
-	.profile-info {
-		flex: 1;
-	}
-
-	.profile-name {
-		color: var(--efabi-h2);
-		font-size: 1.5em;
-		margin-bottom: 5px;
-		font-weight: 700;
-	}
-
-	.profile-nip05 {
-		color: var(--efabi-link);
-		font-size: 0.95em;
-		font-weight: 500;
-	}
-
-	.profile-about {
-		color: var(--efabi-text);
-		margin-bottom: 15px;
-		line-height: 1.6;
-	}
-
-	.profile-about :global(p) {
-		margin-bottom: 10px;
-	}
-
-	.profile-website {
-		margin-bottom: 15px;
-	}
-
-	.profile-website :global(a) {
-		color: var(--efabi-link);
-		text-decoration: none;
-		border-bottom: 1px solid var(--efabi-link);
-		transition: color 0.2s ease;
-	}
-
-	.profile-website :global(a:hover) {
-		color: var(--efabi-link-hover);
-		border-bottom-color: var(--efabi-link-hover);
 	}
 
 	@media (max-width: 768px) {
