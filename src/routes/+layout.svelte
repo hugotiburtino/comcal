@@ -24,15 +24,13 @@
 				throw new Error('No private key found in user profile');
 			}
 
-			console.log({nsec});
-		
-			// Try to decode as regular nsec
-			const decoded = nip19.decode(nsec);
-			if (decoded.type !== 'nsec') {
-				errorMessage = 'Invalid key format. Please enter a valid nsec or ncryptsec key.';
-				return;
+			if (nsec.startsWith('nsec')) {
+				// Try to decode as regular nsec
+				const decoded = nip19.decode(nsec);
+				privateKey = decoded.data;
+			} else {
+				privateKey = nsec;
 			}
-			privateKey = decoded.data;
 			
 			// Create signer and account with the private key
 			const simpleSigner = new SimpleSigner(privateKey);
@@ -59,7 +57,6 @@
 
 	onMount(async () => {
 		const currentUrl = window.location.href;
-		
 		const urlParams = new URLSearchParams(currentUrl);
 		const hasOidcParams = urlParams.has('code') && urlParams.has('session_state');
 		// Only process OIDC callback if URL contains 'code' and 'state' parameters
@@ -67,8 +64,8 @@
 			const oidcUserManager = new UserManager({
 				authority: 'http://localhost:8080/realms/master',
 				client_id: 'kanban-board',
-				redirect_uri: currentUrl,
-				post_logout_redirect_uri: currentUrl,
+				redirect_uri: window.location.host + window.location.pathname,
+				post_logout_redirect_uri: window.location.host + window.location.pathname,
 				response_type: 'code',
 				scope: 'openid profile email',
 				automaticSilentRenew: true,
