@@ -114,7 +114,9 @@
 
 <div class="navbar bg-base-100 shadow-sm justify-between">
 	<div class="logo-container">
-		<img src="https://efabi.net/wp-content/uploads/2025/07/Logo-korrekt.png" alt="efabiNet Logo" title="efabiNet Logo" />
+		<a href="/">
+			<img src="https://efabi.net/wp-content/uploads/2025/07/Logo-korrekt.png" alt="efabiNet Logo" title="efabiNet Logo" />
+		</a>
 		<h1 class="text-4xl font-bold">Das Netzwerk für Evangelische Familienbildung</h1>
 	</div>
 	<div class="flex gap-3 items-start">

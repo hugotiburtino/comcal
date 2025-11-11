@@ -90,11 +90,13 @@
 </svelte:head>
 
 <Navbar />
+
 {#if errorMessage}
 	<div class="alert alert-danger" role="alert">
 		{errorMessage}
 	</div>
 {/if}
+
 <ModalManager />
 {@render children?.()}
 
